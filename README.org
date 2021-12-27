@@ -1,0 +1,17 @@
+* XpandKeys
+
+XpandKeys is an X daemon that converts abbreviations into longer strings of
+text which replace them as the users types.  It works independently of the
+window manager and desktop environment.  It was inspired by the TypeIt4Me
+program that the Author used on Mac OS 7.  It works similarly to Xbindkeys and
+sxhkd, and uses similar input processing techniques.
+
+* Installation
+
+* Configuration
+
+* Copyright and License
+
+Copyright (C) 2021 Kyle W T Sherman
+
+License:  [[file:LICENSE][GNU General Public License 2]]
