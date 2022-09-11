@@ -1,5 +1,5 @@
 /******************************************************************************
- * XpandKeys: Convert abbreviations to longer strings under X11.              *
+ * xpandkeys: Convert abbreviations to longer strings under X11.              *
  *                                                                            *
  * Copyright (C) 2022 Kyle W T Sherman                                        *
  *                                                                            *
@@ -25,31 +25,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.                *
  ******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include "minunit.h"
-#include "xpandkeys.h"
+#ifndef __BASE_H
+#define __BASE_H
 
-int tests_run = 0;
+#define MAXLEN 256
+#define LENGTH(x) (sizeof(x) / sizeof(*x))
 
-static char * test_get_string() {
-    mu_assert("get_string should return 'Hello World!'",
-              !strcmp("Hello World!", get_string()));
-    return 0;
-}
+#ifdef DEBUG
+#define PUTS(x) puts(x)
+#define PRINTF(x, ...) printf(x, __VA_ARGS__)
+#else
+#define PUTS(x) ((void)0)
+#define PRINTF(x, ...) ((void)0)
+#endif
 
-static char * all_tests() {
-    mu_run_test(test_get_string);
-    return 0;
-}
-
-int main(int argc, char *argv[]) {
-    char *result = all_tests();
-    if (result != 0) {
-        printf("Error: %s\n", result);
-    } else {
-        printf("ALL TESTS PASSED\n");
-    }
-    printf("Tests run: %d\n", tests_run);
-    return result != 0;
-}
+#endif // __BASE_H

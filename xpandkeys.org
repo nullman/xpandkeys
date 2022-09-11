@@ -11,7 +11,7 @@
   #+LANGUAGE: en
   #+PROPERTY: header-args :tangle no :noweb yes :results silent :mkdir yes
   #+OPTIONS: num:nil toc:nil d:(HIDE) tags:not-in-toc html-preamble:nil html-postamble:nil
-  #+TIMESTAMP: <2022-08-07 22:44 (kyle)>
+  #+TIMESTAMP: <2022-09-11 12:47 (kyle)>
 
 * Table of Contents
   :PROPERTIES:
@@ -25,10 +25,16 @@
   - [[#author][Author]]
   - [[#copyright][Copyright]]
   - [[#url][URL]]
+  - [[#program-version][Program Version]]
+  - [[#program-name][Program Name]]
+  - [[#program-blurb][Program Blurb]]
+  - [[#author-header][Author Header]]
   - [[#license-header][License Header]]
+  - [[#header][Header]]
 - [[#readmeorg][README.org]]
 - [[#src][src]]
-  - [[#xpandkeysc][xpandkeys.c]]
+  - [[#baseh][base.h]]
+  - [[#xpandkeysh][xpandkeys.h]]
   - [[#xpandkeysc][xpandkeys.c]]
 - [[#test][test]]
   - [[#run_testsc][run_tests.c]]
@@ -37,7 +43,9 @@
 - [[#xpandkeysspec][xpandkeys.spec]]
 - [[#makefile][Makefile]]
 - [[#build-and-test][Build and Test]]
+  - [[#clean-build][Clean, Build]]
   - [[#clean-build-and-run][Clean, Build, and Run]]
+  - [[#clean-debug-and-run][Clean, Debug, and Run]]
   - [[#clean-and-test][Clean and Test]]
 - [[#gitignore][.gitignore]]
 - [[#license][LICENSE]]
@@ -85,23 +93,71 @@
       URL: https://github.com/nullman/xpandkeys
     #+END_SRC
 
+*** Program Version
+
+    #+NAME: program-version
+    #+BEGIN_SRC org
+      1.0.0
+    #+END_SRC
+
+*** Program Name
+
+    #+NAME: program-name
+    #+BEGIN_SRC org
+      xpandkeys
+    #+END_SRC
+
+*** Program Blurb
+
+    #+NAME: program-blurb
+    #+BEGIN_SRC org
+      <<program-name>>: Convert abbreviations to longer strings under X11.
+    #+END_SRC
+
+*** Author Header
+
+    #+NAME: author-header
+    #+BEGIN_SRC c
+      /******************************************************************************
+       ,* <<program-blurb>>              *
+       ,*                                                                            *
+       ,* <<copyright>>                                        *
+       ,*                                                                            *
+       ,* <<author>>                          *
+       ,* <<url>>                                  *
+       ,* Created: 2021-12-26                                                        *
+       ,* Version: <<program-version>>                                                             *
+       ,******************************************************************************/
+    #+END_SRC
+
 *** License Header
 
     #+NAME: license-header
-    #+BEGIN_SRC org
-      This program is free software; you can redistribute it and/or modify
-      it under the terms of the GNU General Public License as published by
-      the Free Software Foundation; either version 2 of the License, or
-      (at your option) any later version.
+    #+BEGIN_SRC c
+      /******************************************************************************
+       ,* This program is free software; you can redistribute it and/or modify       *
+       ,* it under the terms of the GNU General Public License as published by       *
+       ,* the Free Software Foundation; either version 2 of the License, or          *
+       ,* (at your option) any later version.                                        *
+       ,*                                                                            *
+       ,* This program is distributed in the hope that it will be useful,            *
+       ,* but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+       ,* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the               *
+       ,* GNU General Public License for more details.                               *
+       ,*                                                                            *
+       ,* You should have received a copy of the GNU General Public License along    *
+       ,* with this program; if not, write to the Free Software Foundation, Inc.,    *
+       ,* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.                *
+       ,******************************************************************************/
+    #+END_SRC
 
-      This program is distributed in the hope that it will be useful,
-      but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-      GNU General Public License for more details.
+*** Header
 
-      You should have received a copy of the GNU General Public License along
-      with this program; if not, write to the Free Software Foundation, Inc.,
-      51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+    #+NAME: header
+    #+BEGIN_SRC c
+      <<author-header>>
+
+      <<license-header>>
     #+END_SRC
 
 * README.org
@@ -110,9 +166,9 @@
     ,* XpandKeys
 
       XpandKeys is an X daemon that converts abbreviations into longer strings of
-      text which replace them as the users types under X.  It works independently of
-      the window manager and desktop environment.  It was inspired by the Mac OS 6/7
-      TypeIt4Me program.  It works similarly to Xbindkeys and sxhkd, and uses
+      text which replace them as the users types under X. It works independently of
+      the window manager and desktop environment. It was inspired by the Mac OS 6/7
+      TypeIt4Me program. It works similarly to Xbindkeys and sxhkd, including using
       similar input processing techniques.
 
     ,* Installation
@@ -137,27 +193,131 @@
 
 * src
 
-*** xpandkeys.c
+*** base.h
+
+    #+BEGIN_SRC c :tangle src/base.h
+      <<header>>
+
+      #ifndef __BASE_H
+      #define __BASE_H
+
+      #define MAXLEN 256
+      #define LENGTH(x) (sizeof(x) / sizeof(*x))
+
+      #ifdef DEBUG
+      #define PUTS(x) puts(x)
+      #define PRINTF(x, ...) printf(x, __VA_ARGS__)
+      #else
+      #define PUTS(x) ((void)0)
+      #define PRINTF(x, ...) ((void)0)
+      #endif
+
+      #endif // __BASE_H
+    #+END_SRC
+
+*** xpandkeys.h
 
     #+BEGIN_SRC c :tangle src/xpandkeys.h
-      #ifndef __XPANDKEYS_H__
-      #define __XPANDKEYS_H__
-      extern char * get_string();
-      #endif
+      <<header>>
+
+      #ifndef __XPANDKEYS_H
+      #define __XPANDKEYS_H
+
+      #include <stdio.h>
+      #include "base.h"
+
+      #define PROGRAM_NAME    "<<program-name>>"
+      #define PROGRAM_VERSION "<<program-version>>"
+      #define AUTHOR_NAME     "<<name>>"
+      #define CONFIG_HOME_ENV "XDG_CONFIG_HOME"
+      #define CONFIG_PATH     "xpandkeys/xpandkeys.conf"
+
+      typedef struct {
+          bool exit;
+          char *config_path;
+      } options_state_t;
+
+      extern char *config_path;
+      extern char  config_file[MAXLEN];
+
+      extern void print_version();
+      extern void print_help();
+      extern void get_options(int argc, char *argv[], options_state_t *options_state);
+
+      #endif // __XPANDKEYS_H
     #+END_SRC
 
 *** xpandkeys.c
 
     #+BEGIN_SRC c :tangle src/xpandkeys.c
-      #include <stdio.h>
+      <<header>>
 
-      extern char * get_string() {
-          return "Hello World!";
+      #include <getopt.h>
+      #include <stdbool.h>
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "base.h"
+      #include "xpandkeys.h"
+
+      extern void print_version() {
+          printf("%s %s by %s\n", PROGRAM_NAME, PROGRAM_VERSION, AUTHOR_NAME);
+      }
+
+      extern void print_help() {
+          print_version();
+          printf("Usage: %s [OPTIONS]\n", PROGRAM_NAME);
+          printf("Where OPTIONS are:\n");
+          printf("  -c, --config PATH  Use PATH instead of default configuration path\n");
+          printf("  -v, --version      Print version and exit\n");
+          printf("  -h, --help         Print help and exit\n");
+      }
+
+      extern void get_options(int argc, char *argv[], options_state_t *options_state) {
+          options_state->exit = false;
+          options_state->config_path = NULL;
+
+          static struct option const long_options[] = {
+              /* NAME       ARGUMENT            FLAG   SHORTNAME */
+              { "help",     no_argument,        NULL,  'h' },
+              { "version",  no_argument,        NULL,  'v' },
+              { "config",   required_argument,  NULL,  'c' },
+              { NULL,       0,                  NULL,  0 }
+          };
+
+          int opt;
+          int option_index = 0;
+          while ((opt = getopt_long(argc, argv, "hvc:", long_options, &option_index)) != -1) {
+              switch (opt) {
+                  case 'c':
+                      options_state->config_path = optarg;
+                      break;
+                  case 'v':
+                      options_state->exit = true;
+                      print_version();
+                      return;
+                      break;
+                  case 'h':
+                  default:
+                      options_state->exit = true;
+                      print_help();
+                      return;
+                      break;
+              }
+          }
       }
 
       #if ! TEST
       int main(int argc, char *argv[]) {
-          printf("%s\n", get_string());
+          options_state_t options_state;
+          options_state.exit = false;
+          options_state.config_path = NULL;
+
+          get_options(argc, argv, &options_state);
+          PRINTF("options_state:\n  exit: %d\n  config_path: %s\n",
+                 options_state.exit, options_state.config_path);
+          if (options_state.exit) exit(EXIT_SUCCESS);
+
+          exit(EXIT_SUCCESS);
       }
       #endif
     #+END_SRC
@@ -166,6 +326,8 @@
 
 *** run_tests.c
     #+BEGIN_SRC c :tangle test/src/run_tests.c
+      <<header>>
+
       #include <stdio.h>
       #include <string.h>
       #include "minunit.h"
@@ -174,7 +336,7 @@
       int tests_run = 0;
 
       static char * test_get_string() {
-          mu_assert("get_string did not return 'Hello World!'",
+          mu_assert("get_string should return 'Hello World!'",
                     !strcmp("Hello World!", get_string()));
           return 0;
       }
@@ -198,14 +360,14 @@
 
 *** minunit.h
     #+BEGIN_SRC c :tangle test/src/minunit.h
-      /**
-       ,* minunit.h
-       ,*
-       ,* Minimal test framework.
-       ,*
-       ,* Author: John Brewer
-       ,* Source: https://jera.com/techinfo/jtns/jtn002
-       ,*/
+      /******************************************************************************
+       ,* minunit.h                                                                  *
+       ,*                                                                            *
+       ,* Minimal test framework.                                                    *
+       ,*                                                                            *
+       ,* Author: John Brewer                                                        *
+       ,* Source: https://jera.com/techinfo/jtns/jtn002                              *
+       ,******************************************************************************/
 
       #define mu_assert(message, test) do { if (!(test)) return message; } while (0)
       #define mu_run_test(test) do { \
@@ -327,9 +489,13 @@
     LDFLAGS  := -Llib
     LDLIBS   := -lm
 
-    .PHONY: all build test clean
+    .PHONY: all debug build test clean
 
     all: build
+
+    debug: CPPFLAGS += -DDEBUG -g
+    debug: CFLAGS += -DDEBUG -g
+    debug: build
 
     build: $(TARGET_FILE)
 
@@ -354,6 +520,21 @@
 
 * Build and Test
 
+*** Clean, Build
+
+    #+BEGIN_SRC sh :results output replace
+      make clean build 2>&1
+    #+END_SRC
+
+    #+RESULTS:
+    : pushd test && ( make clean ; popd )
+    : ~/code/github-nullman/xpandkeys/test ~/code/github-nullman/xpandkeys
+    : make[1]: Entering directory '/home/kyle/code/github-nullman/xpandkeys/test'
+    : make[1]: Leaving directory '/home/kyle/code/github-nullman/xpandkeys/test'
+    : ~/code/github-nullman/xpandkeys
+    : cc -MMD -MP -Wall -Isrc -DTEST=0 -c src/xpandkeys.c -o obj/xpandkeys.o
+    : cc -Llib obj/xpandkeys.o -lm -o bin/xpandkeys
+
 *** Clean, Build, and Run
 
     #+BEGIN_SRC sh :results output replace
@@ -361,7 +542,29 @@
     #+END_SRC
 
     #+RESULTS:
-    : Hello World!
+    : xpandkeys 1.0.0 by Kyle W T Sherman
+    : Usage: xpandkeys [OPTIONS]
+    : Where OPTIONS are:
+    :   -c, --config PATH  Use PATH instead of default configuration path
+    :   -v, --version      Print version and exit
+    :   -h, --help         Print help and exit
+
+*** Clean, Debug, and Run
+
+    #+BEGIN_SRC sh :results output replace
+      make clean debug 2>&1 > /dev/null && ./bin/xpandkeys --help
+    #+END_SRC
+
+    #+RESULTS:
+    : xpandkeys 1.0.0 by Kyle W T Sherman
+    : Usage: xpandkeys [OPTIONS]
+    : Where OPTIONS are:
+    :   -c, --config PATH  Use PATH instead of default configuration path
+    :   -v, --version      Print version and exit
+    :   -h, --help         Print help and exit
+    : options_state:
+    :   exit: 1
+    :   config_path: (null)
 
 *** Clean and Test
 

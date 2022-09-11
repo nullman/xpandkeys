@@ -16,9 +16,13 @@ CFLAGS   := -Wall
 LDFLAGS  := -Llib
 LDLIBS   := -lm
 
-.PHONY: all build test clean
+.PHONY: all debug build test clean
 
 all: build
+
+debug: CPPFLAGS += -DDEBUG -g
+debug: CFLAGS += -DDEBUG -g
+debug: build
 
 build: $(TARGET_FILE)
 

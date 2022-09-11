@@ -1,11 +1,11 @@
-/**
- * minunit.h
- *
- * Minimal test framework.
- *
- * Author: John Brewer
- * Source: https://jera.com/techinfo/jtns/jtn002
- */
+/******************************************************************************
+ * minunit.h                                                                  *
+ *                                                                            *
+ * Minimal test framework.                                                    *
+ *                                                                            *
+ * Author: John Brewer                                                        *
+ * Source: https://jera.com/techinfo/jtns/jtn002                              *
+ ******************************************************************************/
 
 #define mu_assert(message, test) do { if (!(test)) return message; } while (0)
 #define mu_run_test(test) do { \
