@@ -1,7 +1,7 @@
 /******************************************************************************
  * xpandkeys: Convert abbreviations to longer strings under X11.              *
  *                                                                            *
- * Copyright (C) 2022 Kyle W T Sherman                                        *
+ * Copyright © 2021-2023 Kyle W T Sherman                                     *
  *                                                                            *
  * Author: Kyle W T Sherman <kylewsherman@gmail.com>                          *
  * URL: https://github.com/nullman/xpandkeys                                  *
